@@ -1,0 +1,36 @@
+{
+  "name": "narrative-wheel-coin",
+  "version": "1.0.0",
+  "description": "A live visualization of trending crypto narratives connected to a Pump.fun token",
+  "main": "backend/index.js",
+  "scripts": {
+    "start": "node backend/index.js",
+    "dev": "nodemon backend/index.js",
+    "frontend": "live-server public --port=8080",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "solana",
+    "pump.fun",
+    "d3.js",
+    "crypto",
+    "visualization",
+    "narratives"
+  ],
+  "author": "TrendWheel Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

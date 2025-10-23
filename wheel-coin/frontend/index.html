@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sol TrendWheel 🎡 - Solana Narrative Tracking</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* Animated background particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .main-title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ff88, #00ccff, #ff6b6b);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 3s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #888;
+            font-weight: 400;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 900px;
+            height: 900px;
+            margin-bottom: 20px;
+        }
+        
+        .wheel-svg {
+            filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.3));
+        }
+        
+        .narrative-segment {
+            cursor: pointer;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .narrative-segment:hover {
+            opacity: 0.8;
+            transform: scale(1.02);
+        }
+        
+        .segment-emerging {
+            animation: pulse 2s infinite;
+        }
+        
+        .segment-growing {
+            animation: glow 1.5s infinite alternate;
+        }
+        
+        .segment-peak {
+            animation: peak-glow 1s infinite alternate;
+            filter: drop-shadow(0 0 15px currentColor);
+        }
+        
+        .segment-declining {
+            opacity: 0.6;
+            animation: fade 3s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        
+        @keyframes glow {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.3); }
+        }
+        
+        @keyframes peak-glow {
+            0% { filter: drop-shadow(0 0 10px currentColor) brightness(1); }
+            100% { filter: drop-shadow(0 0 25px currentColor) brightness(1.4); }
+        }
+        
+        @keyframes fade {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.3; }
+        }
+        
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.9) 0%, rgba(26, 26, 46, 0.9) 100%);
+            border: 4px solid #00ff88;
+            border-radius: 50%;
+            width: 160px;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+            font-weight: 700;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+        
+        .wheel-logo {
+            font-size: 28px;
+            color: #00ff88;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+        
+        .wheel-status {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .wheel-pulse {
+            font-size: 10px;
+            color: #666;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .status-panel {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #333;
+            font-size: 14px;
+            min-width: 250px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        
+        .status-label {
+            color: #aaa;
+            font-weight: 400;
+        }
+        
+        .status-value {
+            font-weight: 600;
+            color: white;
+        }
+        
+        .status-active { color: #00ff88; text-shadow: 0 0 8px rgba(0, 255, 136, 0.6); }
+        .status-spinning { color: #00ccff; text-shadow: 0 0 8px rgba(0, 204, 255, 0.6); }
+        .status-slow { color: #ffaa00; text-shadow: 0 0 8px rgba(255, 170, 0, 0.6); }
+        .status-stopped { color: #ff4444; text-shadow: 0 0 8px rgba(255, 68, 68, 0.6); }
+        
+        .narrative-segment {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .narrative-segment:hover {
+            filter: brightness(1.2);
+            stroke-width: 3px;
+        }
+        
+        .narrative-label {
+            font-size: 14px;
+            font-weight: 700;
+            text-anchor: middle;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.8);
+            fill: white;
+            stroke: #000;
+            stroke-width: 0.5;
+            paint-order: stroke fill;
+            dominant-baseline: middle;
+        }
+        
+        .narrative-score {
+            font-size: 11px;
+            font-weight: 600;
+            text-anchor: middle;
+            pointer-events: none;
+            fill: rgba(255, 255, 255, 0.9);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+            stroke: #000;
+            stroke-width: 0.4;
+            paint-order: stroke fill;
+            dominant-baseline: middle;
+        }
+        
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            font-size: 18px;
+            color: #00ff88;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 136, 0.2);
+            border-top: 4px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .cta-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            text-align: center;
+        }
+        
+        .cta-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ff4444;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+        }
+        
+        .cta-description {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: #ccc;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .cta-button {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: black;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.6);
+        }
+        
+        .legend {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #333;
+            backdrop-filter: blur(10px);
+        }
+        
+        .legend-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .heartbeat {
+            animation: heartbeat 2s infinite;
+        }
+        
+        @keyframes fadeout {
+            0% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+        
+        .fading {
+            animation: fadeout 3s infinite alternate;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .wheel-container {
+                width: 500px;
+                height: 500px;
+            }
+            
+            .main-title {
+                font-size: 2rem;
+            }
+            
+            .status-panel {
+                top: 20px;
+                right: 20px;
+                font-size: 12px;
+                min-width: 200px;
+            }
+            
+            .legend {
+                bottom: 20px;
+                left: 20px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="main-title">SOL TRENDWHEEL</h1>
+            <p class="subtitle">Live Crypto Narrative Tracking</p>
+        </div>
+        
+        <div class="wheel-container">
+            <svg class="wheel-svg" id="wheel" width="900" height="900"></svg>
+            
+            <div class="wheel-center">
+                <div class="wheel-logo">$WHEEL</div>
+                <div class="wheel-status" id="centerStatus">LOADING</div>
+                <div class="wheel-pulse">SOLANA</div>
+            </div>
+        </div>
+        
+        <div class="status-panel">
+            <div class="status-row">
+                <span class="status-label">Status:</span>
+                <span class="status-value" id="status">Loading...</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Narratives:</span>
+                <span class="status-value" id="narrativeCount">0</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Tokens:</span>
+                <span class="status-value" id="tokenCount">20</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">AI Confidence:</span>
+                <span class="status-value" id="confidence">85%</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Updated:</span>
+                <span class="status-value" id="lastUpdate">Never</span>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-title">Narratives</div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff6b6b;"></div>
+                <span>AI & Machine Learning</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4ecdc4;"></div>
+                <span>Dogs & Animal Tokens</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #45b7d1;"></div>
+                <span>Meme Culture</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #96ceb4;"></div>
+                <span>Gaming & Metaverse</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffeaa7;"></div>
+                <span>DeFi & Yield</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #dda0dd;"></div>
+                <span>NFT & Art</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div>Connecting to Narrative Wheel...</div>
+    </div>
+    
+    <!-- CTA Overlay for Dead State -->
+        <div class="cta-overlay" id="ctaOverlay" style="display: none;">
+            <div class="cta-title">� DATA OFFLINE �</div>
+            <div class="cta-description">
+                The Narrative Wheel cannot connect to live data sources.<br>
+                Check your connection or refresh to retry loading the latest narrative data.
+            </div>
+            <button class="cta-button" onclick="refreshData()">� Refresh Data</button>
+        </div>    <script>
+        // Global configuration
+        const CONFIG = {
+            updateInterval: 30000, // 30 seconds
+            wheelRadius: 350,
+            innerRadius: 90,
+            narratives: [
+                { name: 'AI', fullName: 'AI & ML', color: '#ff6b6b' },
+                { name: 'Dogs', fullName: 'Dogs & Animals', color: '#4ecdc4' },
+                { name: 'Meme', fullName: 'Meme Culture', color: '#45b7d1' },
+                { name: 'Gaming', fullName: 'Gaming & Metaverse', color: '#96ceb4' },
+                { name: 'DeFi', fullName: 'DeFi & Yield', color: '#ffeaa7' },
+                { name: 'NFT', fullName: 'NFT & Art', color: '#dda0dd' }
+            ]
+        };
+        
+        // Global state
+        let wheelData = null;
+        let wheelSvg = null;
+        let isLoading = true;
+        
+        // Initialize the application
+        async function initApp() {
+            console.log('🎡 Initializing Dynamic Narrative Wheel...');
+            
+            // Initialize background particles
+            createParticles();
+            
+            // Initialize D3.js wheel
+            wheelSvg = d3.select("#wheel");
+            
+            // Try to fetch dynamic narratives first
+            const hasDynamicNarratives = await fetchDynamicNarratives();
+            if (hasDynamicNarratives) {
+                console.log('✅ Using dynamic narrative detection');
+            } else {
+                console.log('⚠️ Falling back to static narratives');
+            }
+            
+            // Fetch initial wheel data
+            await fetchWheelData();
+            
+            // Hide loading screen
+            hideLoadingScreen();
+            
+            // Start update intervals
+            setInterval(fetchWheelData, CONFIG.updateInterval);
+            
+            // Fetch dynamic narratives every 5 minutes
+            setInterval(async () => {
+                const updated = await fetchDynamicNarratives();
+                if (updated) {
+                    console.log('🔄 Dynamic narratives updated, re-rendering wheel...');
+                    renderWheel();
+                }
+            }, 5 * 60 * 1000);
+        }
+        
+        // Create animated background particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 4 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Hide loading screen with animation
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                isLoading = false;
+            }, 500);
+        }
+        
+        // Fetch data from backend API
+        async function fetchWheelData() {
+            try {
+                console.log('📡 Fetching wheel data...');
+                const response = await fetch('/api/wheel-state');
+                const data = await response.json();
+                
+                if (data.success) {
+                    wheelData = data.data;
+                    console.log('✅ Wheel data updated:', wheelData.status);
+                    updateUI();
+                    renderWheel();
+                } else {
+                    console.error('❌ Failed to fetch wheel data:', data);
+                    handleError('Failed to fetch data');
+                }
+            } catch (error) {
+                console.error('❌ Error fetching wheel data:', error);
+                handleError('Connection error');
+            }
+        }
+        
+        // Handle API errors
+        function handleError(message) {
+            const status = document.getElementById('status');
+            status.textContent = `ERROR: ${message}`;
+            status.className = 'status-value status-dead';
+        }
+        
+        // Update UI elements with new data
+        function updateUI() {
+            if (!wheelData) return;
+            
+            // Update status elements
+            const status = document.getElementById('status');
+            const lastUpdate = document.getElementById('lastUpdate');
+            const centerStatus = document.getElementById('centerStatus');
+            const ctaOverlay = document.getElementById('ctaOverlay');
+            
+            // Update status with appropriate styling
+            status.textContent = wheelData.status.toUpperCase();
+            status.className = `status-value status-${wheelData.status}`;
+            centerStatus.textContent = wheelData.status.toUpperCase();
+            centerStatus.className = `wheel-status status-${wheelData.status}`;
+            
+            // Update data values
+            const narrativeCount = Object.keys(wheelData.narratives || {}).length;
+            document.getElementById('narrativeCount').textContent = narrativeCount;
+            document.getElementById('tokenCount').textContent = wheelData.tokenData.totalTokens || '50';
+            document.getElementById('confidence').textContent = Math.round(wheelData.tokenData.avgConfidence || wheelData.accuracy || 85) + '%';
+            lastUpdate.textContent = new Date(wheelData.lastUpdate).toLocaleTimeString();
+            
+            // Handle visual states
+            const wheelContainer = document.querySelector('.wheel-container');
+            wheelContainer.classList.remove('heartbeat', 'fading');
+            
+            // Only show CTA overlay if wheel is stopped with no data
+            if (wheelData.status === 'stopped' && Object.keys(wheelData.narratives || {}).length === 0) {
+                ctaOverlay.style.display = 'flex';
+                wheelContainer.classList.add('fading');
+            } else {
+                ctaOverlay.style.display = 'none';
+                if (wheelData.status === 'slow') {
+                    wheelContainer.classList.add('heartbeat');
+                } else if (wheelData.status === 'spinning') {
+                    // No spinning animation - emphasize strong narratives instead
+                }
+            }
+        }
+        
+        // Dynamic narrative data (will be populated from backend)
+        let dynamicNarratives = [];
+        
+        // Render the D3.js wheel visualization with dynamic narratives
+        function renderWheel() {
+            if (!wheelData || !wheelSvg) return;
+            
+            console.log('🎨 Rendering dynamic wheel visualization...');
+            
+            const width = 900;
+            const height = 900;
+            const radius = CONFIG.wheelRadius;
+            const innerRadius = CONFIG.innerRadius;
+            
+            // Clear previous render
+            wheelSvg.selectAll("*").remove();
+            
+            // Create main container group
+            const g = wheelSvg.append("g")
+                .attr("transform", `translate(${width/2},${height/2})`);
+            
+            // Use dynamic narratives if available, otherwise fallback to static
+            const narrativeData = dynamicNarratives.length > 0 
+                ? prepareDynamicNarrativeData() 
+                : prepareStaticNarrativeData();
+            
+            // Create pie layout with dynamic sizing and better spacing
+            const pie = d3.pie()
+                .value(d => Math.max(d.displayScore, 1))
+                .sort((a, b) => b.strength - a.strength) // Sort by narrative strength
+                .padAngle(narrativeData.length > 10 ? 0.03 : 0.02); // More padding for many narratives
+            
+            // Create adaptive arc generators with better spacing for many narratives
+            const arc = d3.arc()
+                .innerRadius(innerRadius)
+                .outerRadius(d => {
+                    // Vary radius based on narrative lifecycle and reduce overlap
+                    const baseRadius = narrativeData.length > 10 ? radius - 20 : radius;
+                    const lifecycle = d.data.lifecycle?.stage || 'stable';
+                    const multipliers = {
+                        emerging: 0.85,
+                        growing: 0.95,
+                        peak: 1.0,
+                        declining: 0.8
+                    };
+                    return baseRadius * (multipliers[lifecycle] || 0.9);
+                });
+            
+            // Adaptive label positioning with clear separation
+            const labelArc = d3.arc()
+                .innerRadius(narrativeData.length > 10 ? radius - 60 : radius - 70)
+                .outerRadius(narrativeData.length > 10 ? radius - 60 : radius - 70);
+                
+            const scoreArc = d3.arc()
+                .innerRadius(narrativeData.length > 10 ? radius - 20 : radius - 30)
+                .outerRadius(narrativeData.length > 10 ? radius - 20 : radius - 30);
+            
+            // Create segments with lifecycle-aware styling
+            const segments = g.selectAll(".narrative-segment")
+                .data(pie(narrativeData))
+                .enter().append("g")
+                .attr("class", d => `narrative-segment segment-${d.data.lifecycle?.stage || 'stable'}`);
+            
+            // Add segment paths with emphasis on stronger narratives
+            segments.append("path")
+                .attr("d", arc)
+                .attr("fill", d => getNarrativeColor(d.data))
+                .attr("stroke", d => {
+                    const strength = d.data.score / 100;
+                    return strength > 0.6 ? "#ffffff" : strength > 0.4 ? "#cccccc" : "#666666";
+                })
+                .attr("stroke-width", d => {
+                    const strength = d.data.score / 100;
+                    return strength > 0.6 ? 4 : strength > 0.4 ? 3 : 2;
+                })
+                .style("opacity", d => {
+                    if (wheelData.status === 'stopped') return 0.4;
+                    if (wheelData.status === 'slow') return 0.7;
+                    
+                    // Emphasize stronger narratives
+                    const strength = d.data.score / 100;
+                    const lifecycle = d.data.lifecycle?.stage;
+                    const baseOpacity = { emerging: 0.7, growing: 0.9, peak: 1.0, declining: 0.6 }[lifecycle] || 0.9;
+                    
+                    return Math.max(0.6, baseOpacity + strength * 0.2);
+                })
+                .style("filter", d => {
+                    const strength = d.data.score / 100;
+                    if (strength > 0.7) {
+                        return `drop-shadow(0 0 15px ${getNarrativeColor(d.data)}) brightness(1.2)`;
+                    } else if (strength > 0.5) {
+                        return `drop-shadow(0 0 8px ${getNarrativeColor(d.data)}) brightness(1.1)`;
+                    }
+                    return "none";
+                })
+                .on("mouseover", handleSegmentHover)
+                .on("mouseout", handleSegmentLeave)
+                .on("click", handleSegmentClick);
+            
+            // Add narrative labels in the middle area
+            segments.append("text")
+                .attr("transform", d => {
+                    const centroid = labelArc.centroid(d);
+                    return `translate(${centroid})`;
+                })
+                .attr("class", "narrative-label")
+                .style("fill", "white")
+                .style("font-size", d => {
+                    // Adaptive font size based on number of narratives
+                    if (narrativeData.length > 12) return "10px";
+                    if (narrativeData.length > 8) return "11px";
+                    return "12px";
+                })
+                .text(d => {
+                    // Truncate long names for better fit
+                    const name = d.data.name;
+                    if (narrativeData.length > 10 && name.length > 6) {
+                        return name.substring(0, 6) + "...";
+                    }
+                    return name;
+                });
+            
+            // Add score labels MUCH CLOSER TO CENTER (very dramatic positioning)
+            segments.append("text")
+                .attr("transform", d => {
+                    const centroid = scoreArc.centroid(d);
+                    // Move percentages MUCH closer to center - very dramatic
+                    const angle = (d.startAngle + d.endAngle) / 2;
+                    const factor = 0.3; // Move 70% closer to center - very dramatic!
+                    centroid[0] *= factor;
+                    centroid[1] *= factor;
+                    return `translate(${centroid})`;
+                })
+                .attr("class", "narrative-score")
+                .style("font-size", d => {
+                    // Larger score font size to see the change
+                    if (narrativeData.length > 12) return "12px";
+                    if (narrativeData.length > 8) return "13px";
+                    return "14px";
+                })
+                .style("fill", "#00ff00") // Bright green to see if it's working!
+                .text(d => Math.round(d.data.score) + "%");
+            
+            // Add outer glow effect for alive state
+            if (wheelData.status === 'alive') {
+                g.append("circle")
+                    .attr("r", radius + 5)
+                    .attr("fill", "none")
+                    .attr("stroke", "#00ff88")
+                    .attr("stroke-width", 2)
+                    .style("opacity", 0.6)
+                    .style("filter", "blur(3px)");
+            }
+            
+            // Add lifecycle indicators
+            segments.each(function(d) {
+                const lifecycle = d.data.lifecycle?.stage;
+                if (lifecycle === 'emerging' || lifecycle === 'growing') {
+                    d3.select(this).select('path')
+                        .style('filter', 'drop-shadow(0 0 8px currentColor)');
+                }
+            });
+        }
+        
+        // Prepare dynamic narrative data from backend
+        function prepareDynamicNarrativeData() {
+            console.log('📊 Preparing dynamic narrative data...');
+            return dynamicNarratives.map(narrative => ({
+                name: narrative.name || 'Unknown Narrative',
+                displayScore: Math.max(narrative.strength || 0, 5),
+                score: narrative.strength || 0,
+                volume: narrative.metadata?.totalVolume || 0,
+                mentions: narrative.metadata?.totalSocialMentions || 0,
+                color: getNarrativeColor(narrative),
+                lifecycle: narrative.lifecycle || { stage: 'stable' },
+                confidence: narrative.confidence || 0,
+                tokenCount: narrative.metadata?.tokenCount || 0,
+                themes: narrative.themes || {},
+                characteristics: narrative.characteristics || {},
+                tokens: narrative.tokens || []
+            }));
+        }
+        
+        // Fallback to static narrative data
+        function prepareStaticNarrativeData() {
+            return CONFIG.narratives.map(narrative => {
+                const data = wheelData.narratives[narrative.name] || { score: 0, volume: 0, mentions: 0 };
+                return {
+                    ...narrative,
+                    ...data,
+                    displayScore: Math.max(data.score, 5),
+                    lifecycle: { stage: 'stable' }
+                };
+            });
+        }
+        
+        // Get narrative color based on theme and lifecycle
+        function getNarrativeColor(narrative) {
+            // Theme-based colors
+            const themeColors = {
+                'ai': '#00ccff',
+                'animals': '#ff6b6b', 
+                'gaming': '#9b59b6',
+                'defi': '#f39c12',
+                'meme': '#e74c3c',
+                'food': '#e67e22',
+                'political': '#34495e',
+                'rwa': '#27ae60',
+                'space': '#3498db',
+                'energy': '#2ecc71'
+            };
+            
+            // Check primary theme
+            const primaryTheme = narrative.themes?.primary?.theme;
+            if (primaryTheme && themeColors[primaryTheme]) {
+                return adjustColorForLifecycle(themeColors[primaryTheme], narrative.lifecycle?.stage);
+            }
+            
+            // Fallback to lifecycle-based colors
+            const lifecycleColors = {
+                emerging: '#00ff88',
+                growing: '#ffd700', 
+                peak: '#ff4444',
+                declining: '#888888',
+                stable: '#00ccff'
+            };
+            
+            const stage = narrative.lifecycle?.stage || 'stable';
+            return lifecycleColors[stage] || narrative.color || '#00ccff';
+        }
+        
+        // Adjust color brightness based on lifecycle stage
+        function adjustColorForLifecycle(baseColor, stage) {
+            const adjustments = {
+                emerging: 0.8,  // Dimmer
+                growing: 1.2,   // Brighter
+                peak: 1.4,      // Brightest
+                declining: 0.6, // Much dimmer
+                stable: 1.0     // Normal
+            };
+            
+            const factor = adjustments[stage] || 1.0;
+            return adjustColorBrightness(baseColor, factor);
+        }
+        
+        // Utility function to adjust color brightness
+        function adjustColorBrightness(color, factor) {
+            // Simple brightness adjustment
+            const hex = color.replace('#', '');
+            const r = Math.min(255, Math.floor(parseInt(hex.substr(0, 2), 16) * factor));
+            const g = Math.min(255, Math.floor(parseInt(hex.substr(2, 2), 16) * factor));
+            const b = Math.min(255, Math.floor(parseInt(hex.substr(4, 2), 16) * factor));
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+        
+        // Enhanced segment hover handler
+        function handleSegmentHover(event, d) {
+            console.log('🎯 Hovering over narrative:', d.data.name);
+            
+            // Highlight segment
+            d3.select(this).select('path')
+                .transition()
+                .duration(200)
+                .style('opacity', 1)
+                .style('transform', 'scale(1.02)');
+            
+            // Show detailed tooltip
+            showNarrativeTooltip(event, d.data);
+        }
+        
+        // Enhanced segment leave handler
+        function handleSegmentLeave(event, d) {
+            // Reset segment appearance
+            d3.select(this).select('path')
+                .transition()
+                .duration(200)
+                .style('opacity', d => {
+                    if (wheelData.status === 'dead') return 0.4;
+                    const lifecycle = d.data.lifecycle?.stage;
+                    const opacities = { emerging: 0.7, growing: 0.9, peak: 1.0, declining: 0.6 };
+                    return opacities[lifecycle] || 0.9;
+                })
+                .style('transform', 'scale(1)');
+            
+            // Hide tooltip
+            hideNarrativeTooltip();
+        }
+        
+        // New segment click handler for detailed view
+        function handleSegmentClick(event, d) {
+            console.log('🖱️ Clicked on narrative:', d.data.name);
+            showNarrativeDetails(d.data);
+        }
+        
+        // Show detailed narrative tooltip
+        function showNarrativeTooltip(event, narrative) {
+            // Remove existing tooltip
+            d3.select('#narrative-tooltip').remove();
+            
+            const tooltip = d3.select('body')
+                .append('div')
+                .attr('id', 'narrative-tooltip')
+                .style('position', 'absolute')
+                .style('background', 'rgba(0, 0, 0, 0.95)')
+                .style('color', 'white')
+                .style('padding', '15px')
+                .style('border-radius', '10px')
+                .style('border', '2px solid #00ff88')
+                .style('font-family', 'JetBrains Mono, monospace')
+                .style('font-size', '12px')
+                .style('pointer-events', 'none')
+                .style('z-index', '1000')
+                .style('max-width', '300px')
+                .style('box-shadow', '0 5px 15px rgba(0, 0, 0, 0.5)');
+            
+            // Build tooltip content
+            let tooltipHTML = `
+                <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #00ff88;">
+                    ${narrative.name}
+                </div>
+            `;
+            
+            if (narrative.lifecycle?.stage) {
+                tooltipHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <strong>Stage:</strong> <span style="text-transform: capitalize; color: ${getNarrativeColor(narrative)};">
+                            ${narrative.lifecycle.stage}
+                        </span>
+                    </div>
+                `;
+            }
+            
+            tooltipHTML += `
+                <div style="margin-bottom: 8px;">
+                    <strong>Strength:</strong> ${Math.round(narrative.score)}/100
+                </div>
+            `;
+            
+            if (narrative.tokenCount) {
+                tooltipHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <strong>Tokens:</strong> ${narrative.tokenCount}
+                    </div>
+                `;
+            }
+            
+            if (narrative.confidence) {
+                tooltipHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <strong>Confidence:</strong> ${Math.round(narrative.confidence * 100)}%
+                    </div>
+                `;
+            }
+            
+            if (narrative.themes?.primary) {
+                tooltipHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <strong>Theme:</strong> ${narrative.themes.primary.theme}
+                    </div>
+                `;
+            }
+            
+            if (narrative.characteristics?.community) {
+                tooltipHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <strong>Community:</strong> ${narrative.characteristics.community.size}
+                    </div>
+                `;
+            }
+            
+            if (narrative.tokens && narrative.tokens.length > 0) {
+                const sampleTokens = narrative.tokens.slice(0, 3).map(t => t.symbol || t.name).join(', ');
+                tooltipHTML += `
+                    <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #333; font-size: 11px; color: #ccc;">
+                        Examples: ${sampleTokens}${narrative.tokens.length > 3 ? '...' : ''}
+                    </div>
+                `;
+            }
+            
+            tooltip.html(tooltipHTML);
+            
+            // Position tooltip
+            const [mouseX, mouseY] = d3.pointer(event, document.body);
+            tooltip
+                .style('left', (mouseX + 15) + 'px')
+                .style('top', (mouseY - 15) + 'px')
+                .style('opacity', 0)
+                .transition()
+                .duration(200)
+                .style('opacity', 1);
+        }
+        
+        // Hide narrative tooltip
+        function hideNarrativeTooltip() {
+            d3.select('#narrative-tooltip')
+                .transition()
+                .duration(200)
+                .style('opacity', 0)
+                .remove();
+        }
+        
+        // Show detailed narrative information modal
+        function showNarrativeDetails(narrative) {
+            // Remove existing modal
+            d3.select('#narrative-modal').remove();
+            
+            const modal = d3.select('body')
+                .append('div')
+                .attr('id', 'narrative-modal')
+                .style('position', 'fixed')
+                .style('top', '0')
+                .style('left', '0')
+                .style('width', '100%')
+                .style('height', '100%')
+                .style('background', 'rgba(0, 0, 0, 0.9)')
+                .style('z-index', '2000')
+                .style('display', 'flex')
+                .style('align-items', 'center')
+                .style('justify-content', 'center');
+            
+            const modalContent = modal
+                .append('div')
+                .style('background', 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)')
+                .style('padding', '30px')
+                .style('border-radius', '15px')
+                .style('border', '2px solid #00ff88')
+                .style('color', 'white')
+                .style('font-family', 'JetBrains Mono, monospace')
+                .style('max-width', '600px')
+                .style('max-height', '80vh')
+                .style('overflow-y', 'auto')
+                .style('position', 'relative');
+            
+            // Close button
+            modalContent
+                .append('div')
+                .style('position', 'absolute')
+                .style('top', '15px')
+                .style('right', '20px')
+                .style('cursor', 'pointer')
+                .style('font-size', '24px')
+                .style('color', '#ff6b6b')
+                .text('×')
+                .on('click', () => modal.remove());
+            
+            // Build detailed content
+            let detailHTML = `
+                <h2 style="color: #00ff88; margin-bottom: 20px; font-size: 24px;">
+                    ${narrative.name}
+                </h2>
+            `;
+            
+            if (narrative.lifecycle) {
+                detailHTML += `
+                    <div style="margin-bottom: 20px; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px;">
+                        <h3 style="color: #ffd700; margin-bottom: 10px;">Lifecycle Information</h3>
+                        <p><strong>Stage:</strong> ${narrative.lifecycle.stage}</p>
+                        <p><strong>Confidence:</strong> ${Math.round((narrative.lifecycle.confidence || 0) * 100)}%</p>
+                        <p><strong>Description:</strong> ${narrative.lifecycle.description || 'No description available'}</p>
+                    </div>
+                `;
+            }
+            
+            if (narrative.characteristics) {
+                detailHTML += `
+                    <div style="margin-bottom: 20px; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px;">
+                        <h3 style="color: #ffd700; margin-bottom: 10px;">Characteristics</h3>
+                `;
+                
+                if (narrative.characteristics.volatility) {
+                    detailHTML += `<p><strong>Volatility:</strong> ${narrative.characteristics.volatility.level} (${narrative.characteristics.volatility.score}/100)</p>`;
+                }
+                
+                if (narrative.characteristics.community) {
+                    detailHTML += `<p><strong>Community:</strong> ${narrative.characteristics.community.size} community</p>`;
+                }
+                
+                if (narrative.characteristics.market) {
+                    detailHTML += `<p><strong>Market:</strong> ${narrative.characteristics.market.description || 'Various market conditions'}</p>`;
+                }
+                
+                detailHTML += '</div>';
+            }
+            
+            if (narrative.tokens && narrative.tokens.length > 0) {
+                detailHTML += `
+                    <div style="margin-bottom: 20px; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px;">
+                        <h3 style="color: #ffd700; margin-bottom: 10px;">Token Examples (${narrative.tokens.length} total)</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                `;
+                
+                narrative.tokens.slice(0, 6).forEach(token => {
+                    detailHTML += `
+                        <div style="padding: 8px; background: rgba(0, 0, 0, 0.5); border-radius: 5px; font-size: 11px;">
+                            <div style="font-weight: bold; color: #00ff88;">${token.symbol || 'N/A'}</div>
+                            <div style="color: #ccc;">${token.name || 'Unknown'}</div>
+                            ${token.priceChange24h ? `<div style="color: ${token.priceChange24h > 0 ? '#00ff88' : '#ff6b6b'};">
+                                ${token.priceChange24h > 0 ? '+' : ''}${Math.round(token.priceChange24h)}%
+                            </div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                detailHTML += '</div></div>';
+            }
+            
+            modalContent.html(detailHTML);
+            
+            // Click outside to close
+            modal.on('click', function(event) {
+                if (event.target === this) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        // Fetch dynamic narratives from backend
+        async function fetchDynamicNarratives() {
+            try {
+                const response = await fetch('/api/narratives');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('📈 Fetched dynamic narratives:', data);
+                    
+                    if (data.narratives && Array.isArray(data.narratives)) {
+                        dynamicNarratives = data.narratives;
+                        console.log(`✅ Updated with ${dynamicNarratives.length} dynamic narratives`);
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ Could not fetch dynamic narratives:', error);
+            }
+            
+            return false;
+        }
+        
+        // Handle segment hover effects
+        function handleSegmentHover(event, d) {
+            d3.select(event.currentTarget)
+                .select("path")
+                .transition()
+                .duration(200)
+                .attr("stroke-width", 4)
+                .style("filter", "brightness(1.2)");
+                
+            // Show tooltip or additional info
+            console.log(`📊 ${d.data.name}: Score ${d.data.score}, Volume $${d.data.volume.toLocaleString()}`);
+        }
+        
+        function handleSegmentLeave(event, d) {
+            d3.select(event.currentTarget)
+                .select("path")
+                .transition()
+                .duration(200)
+                .attr("stroke-width", 2)
+                .style("filter", "brightness(1)");
+        }
+        
+        // Refresh data function
+        function refreshData() {
+            console.log('🔄 Refreshing narrative data...');
+            location.reload();
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Narrative Wheel Frontend Loading...');
+            initApp();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (!isLoading && wheelData) {
+                renderWheel();
+            }
+        });
+        
+        // Add keyboard shortcuts for development
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'r' || event.key === 'R') {
+                console.log('🔄 Manual refresh triggered');
+                fetchWheelData();
+            }
+        });
+        
+        console.log('✅ Narrative Wheel Frontend Loaded');
+    </script>
+</body>
+</html>
