@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sol TrendWheel">
+    <title>Sol TrendWheel 🎡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        @supports(padding: max(0px)) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wheel-container {
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 400px;
+            max-height: 400px;
+            position: relative;
+            margin: auto;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .title {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            font-weight: bold;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            text-align: center;
+            max-width: 90%;
+            z-index: 10;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 1.5rem;
+        }
+
+        .segment {
+            transition: opacity 0.3s ease;
+        }
+
+        .segment:hover {
+            opacity: 0.8;
+        }
+
+        .narrative-label {
+            font-size: 14px;
+            font-weight: bold;
+            text-anchor: middle;
+            fill: white;
+            stroke: black;
+            stroke-width: 1;
+            paint-order: stroke fill;
+        }
+
+        .narrative-score {
+            font-size: 12px;
+            font-weight: bold;
+            text-anchor: middle;
+            fill: white;
+            stroke: black;
+            stroke-width: 0.5;
+            paint-order: stroke fill;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Sol TrendWheel 🎡</div>
+        <div class="wheel-container">
+            <svg id="wheel"></svg>
+        </div>
+        <div class="info-panel" id="info">
+            <div id="status">Loading premium narratives...</div>
+            <div id="details"></div>
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        let wheelData = null;
+        let narratives = [];
+
+        async function fetchData() {
+            try {
+                console.log('📡 Fetching wheel data...');
+                const response = await fetch('/api/wheel-state');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    wheelData = data.data;
+                    console.log('✅ Data received:', wheelData);
+                    
+                    // Convert narratives object to array
+                    narratives = Object.entries(wheelData.narratives || {}).map(([name, data]) => ({
+                        name,
+                        score: data.score || 0,
+                        volume: data.volume || 0,
+                        mentions: data.mentions || 0,
+                        color: getColorForNarrative(name)
+                    }));
+                    
+                    updateUI();
+                    renderWheel();
+                } else {
+                    console.error('❌ Invalid data structure:', data);
+                    document.getElementById('status').textContent = 'Failed to load data';
+                }
+            } catch (error) {
+                console.error('❌ Error fetching data:', error);
+                document.getElementById('status').textContent = 'Connection error';
+            }
+        }
+
+        function getColorForNarrative(name) {
+            const colors = {
+                'MEMECOIN SUPERCYCLE': '#ff6b6b',
+                'TRUMP AI TAKEOVER': '#4ecdc4',
+                'RWA INFRASTRUCTURE': '#45b7d1',
+                'LIQUID STAKING WARS': '#96ceb4',
+                'DERIVATIVES EXPLOSION': '#ffeaa7',
+                'SOCIAL FI EXPLOSION': '#dda0dd',
+                'POLYMARKET META': '#fd79a8',
+                'CREATOR CAPITAL MARKET': '#00b894'
+            };
+            
+            return colors[name] || '#6c5ce7';
+        }
+
+        function updateUI() {
+            if (!wheelData) return;
+            
+            const statusEl = document.getElementById('status');
+            const detailsEl = document.getElementById('details');
+            
+            const totalNarratives = narratives.length;
+            const avgScore = narratives.length > 0 
+                ? Math.round(narratives.reduce((sum, n) => sum + n.score, 0) / narratives.length)
+                : 0;
+            
+            statusEl.textContent = `${totalNarratives} Premium Narratives Active`;
+            detailsEl.innerHTML = `
+                <div>Status: ${wheelData.status.toUpperCase()}</div>
+                <div>Avg Score: ${avgScore}%</div>
+                <div>Tokens: ${wheelData.tokenData?.totalTokens || 0}</div>
+            `;
+        }
+
+        function renderWheel() {
+            if (narratives.length === 0) {
+                console.log('⚠️ No narratives to render');
+                return;
+            }
+
+            console.log('🎨 Rendering wheel with', narratives.length, 'narratives');
+            
+            const svg = d3.select('#wheel');
+            svg.selectAll('*').remove();
+            
+            const width = 400;
+            const height = 400;
+            const radius = 180;
+            const innerRadius = 60;
+            
+            const g = svg.append('g')
+                .attr('transform', `translate(${width/2}, ${height/2})`);
+            
+            // Create pie layout
+            const pie = d3.pie()
+                .value(d => Math.max(d.score, 1))
+                .sort((a, b) => b.score - a.score);
+            
+            const arc = d3.arc()
+                .innerRadius(innerRadius)
+                .outerRadius(radius);
+            
+            const labelArc = d3.arc()
+                .innerRadius(radius - 40)
+                .outerRadius(radius - 40);
+            
+            const scoreArc = d3.arc()
+                .innerRadius(radius - 80)
+                .outerRadius(radius - 80);
+            
+            // Create segments
+            const segments = g.selectAll('.segment')
+                .data(pie(narratives))
+                .enter().append('g')
+                .attr('class', 'segment');
+            
+            // Add paths
+            segments.append('path')
+                .attr('d', arc)
+                .attr('fill', d => d.data.color)
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .style('opacity', 0.9);
+            
+            // Add narrative labels
+            segments.append('text')
+                .attr('transform', d => `translate(${labelArc.centroid(d)})`)
+                .attr('class', 'narrative-label')
+                .style('font-size', '10px')
+                .text(d => {
+                    const name = d.data.name;
+                    if (name.length > 12) {
+                        return name.substring(0, 12) + '...';
+                    }
+                    return name;
+                });
+            
+            // Add score labels
+            segments.append('text')
+                .attr('transform', d => `translate(${scoreArc.centroid(d)})`)
+                .attr('class', 'narrative-score')
+                .style('font-size', '11px')
+                .text(d => Math.round(d.data.score) + '%');
+            
+            console.log('✅ Wheel rendered successfully');
+        }
+
+        // Initialize
+        fetchData();
+        setInterval(fetchData, 30000); // Update every 30 seconds
+    </script>
+</body>
+</html>

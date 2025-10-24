@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sol TrendWheel">
+    <title>Sol TrendWheel 🎡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        @supports(padding: max(0px)) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
+            }
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        .wheel-container {
+            width: 60vmin;
+            height: 60vmin;
+            max-width: 400px;
+            max-height: 400px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .narratives-panel {
+            flex: 1;
+            max-width: 400px;
+            height: 60vmin;
+            max-height: 400px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .narratives-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .narrative-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .narrative-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .narrative-name {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .narrative-score {
+            font-size: 0.9rem;
+            color: #00ff88;
+            margin-bottom: 8px;
+        }
+
+        .top-coin {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .coin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .coin-symbol {
+            font-weight: bold;
+            color: #ffd700;
+            font-size: 0.9rem;
+        }
+
+        .coin-change {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .coin-change.positive {
+            color: #00ff88;
+        }
+
+        .coin-change.negative {
+            color: #ff4444;
+        }
+
+        .coin-name {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-bottom: 2px;
+        }
+
+        .coin-mcap {
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: bold;
+            text-align: center;
+            z-index: 10;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            text-align: center;
+            z-index: 10;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .narratives-panel {
+                width: 90vw;
+                height: 30vh;
+                max-height: 250px;
+            }
+            
+            .wheel-container {
+                width: 70vmin;
+                height: 70vmin;
+            }
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 1.5rem;
+        }
+
+        /* Scrollbar styling */
+        .narratives-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .narratives-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .narratives-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 136, 0.5);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Sol TrendWheel 🎡</div>
+        
+        <div class="main-content">
+            <div class="wheel-container">
+                <svg id="wheel"></svg>
+            </div>
+            
+            <div class="narratives-panel">
+                <div class="narratives-title">🔥 Top Narratives</div>
+                <div id="narratives-list">
+                    <div class="loading">Loading premium narratives...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel" id="info">
+            Connecting to live market data...
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        let wheelData = null;
+        let narratives = [];
+
+        async function fetchData() {
+            try {
+                console.log('📡 Fetching wheel data...');
+                const response = await fetch('/api/wheel-state');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    wheelData = data.data;
+                    console.log('✅ Data received:', wheelData);
+                    
+                    // Convert narratives object to array
+                    narratives = Object.entries(wheelData.narratives || {})
+                        .map(([name, data]) => ({ name, ...data }))
+                        .sort((a, b) => b.score - a.score);
+                    
+                    updateUI();
+                    renderWheel();
+                } else {
+                    console.error('❌ Invalid data structure:', data);
+                    document.getElementById('info').textContent = 'Failed to load data';
+                }
+            } catch (error) {
+                console.error('❌ Error fetching data:', error);
+                document.getElementById('info').textContent = 'Connection error - retrying...';
+            }
+        }
+
+        function getColorForNarrative(name, index) {
+            const colors = [
+                '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', 
+                '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd',
+                '#00d2d3', '#ff9f43', '#ee5a24', '#00a8ff'
+            ];
+            return colors[index % colors.length];
+        }
+
+        function updateUI() {
+            const narrativesList = document.getElementById('narratives-list');
+            
+            if (narratives.length === 0) {
+                narrativesList.innerHTML = '<div class="loading">No narratives available</div>';
+                return;
+            }
+
+            narrativesList.innerHTML = narratives.map((narrative, index) => {
+                const color = getColorForNarrative(narrative.name, index);
+                const isPositive = narrative.topCoin?.change24h?.startsWith('+');
+                
+                return `
+                    <div class="narrative-item" style="border-left-color: ${color};">
+                        <div class="narrative-name">${narrative.name}</div>
+                        <div class="narrative-score">Score: ${narrative.score}% • ${narrative.mentions} mentions</div>
+                        ${narrative.topCoin ? `
+                            <div class="top-coin">
+                                <div class="coin-header">
+                                    <span class="coin-symbol">${narrative.topCoin.symbol}</span>
+                                    <span class="coin-change ${isPositive ? 'positive' : 'negative'}">${narrative.topCoin.change24h}</span>
+                                </div>
+                                <div class="coin-name">${narrative.topCoin.name}</div>
+                                <div class="coin-mcap">Market Cap: ${narrative.topCoin.marketCap}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // Update info panel
+            const totalNarratives = narratives.length;
+            const avgScore = narratives.reduce((sum, n) => sum + n.score, 0) / totalNarratives;
+            document.getElementById('info').innerHTML = `
+                ${totalNarratives} Premium Narratives Active • Avg Score: ${avgScore.toFixed(1)}% • Status: ${wheelData.status?.toUpperCase()}
+            `;
+        }
+
+        function renderWheel() {
+            if (!narratives.length) return;
+
+            const container = document.querySelector('.wheel-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            const radius = Math.min(width, height) / 2 - 20;
+
+            d3.select('#wheel').selectAll('*').remove();
+
+            const svg = d3.select('#wheel')
+                .attr('width', width)
+                .attr('height', height);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${width/2}, ${height/2})`);
+
+            const pie = d3.pie()
+                .value(d => d.score)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(radius * 0.3)
+                .outerRadius(radius * 0.8);
+
+            const labelArc = d3.arc()
+                .innerRadius(radius * 0.6)
+                .outerRadius(radius * 0.6);
+
+            const arcs = g.selectAll('.arc')
+                .data(pie(narratives))
+                .enter().append('g')
+                .attr('class', 'arc');
+
+            arcs.append('path')
+                .attr('d', arc)
+                .attr('fill', (d, i) => getColorForNarrative(d.data.name, i))
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .style('opacity', 0.8)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).style('opacity', 1);
+                })
+                .on('mouseout', function(event, d) {
+                    d3.select(this).style('opacity', 0.8);
+                });
+
+            arcs.append('text')
+                .attr('transform', d => `translate(${labelArc.centroid(d)})`)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '10px')
+                .attr('fill', 'white')
+                .attr('font-weight', 'bold')
+                .text(d => d.data.score + '%');
+
+            // Add center logo
+            g.append('circle')
+                .attr('r', radius * 0.25)
+                .attr('fill', 'rgba(0, 0, 0, 0.8)')
+                .attr('stroke', '#00ff88')
+                .attr('stroke-width', 3);
+
+            g.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '-0.2em')
+                .attr('font-size', '16px')
+                .attr('fill', '#00ff88')
+                .attr('font-weight', 'bold')
+                .text('SOL');
+
+            g.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '1.2em')
+                .attr('font-size', '12px')
+                .attr('fill', '#fff')
+                .text('TRENDS');
+        }
+
+        // Initialize
+        fetchData();
+        setInterval(fetchData, 30000); // Update every 30 seconds
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (narratives.length > 0) {
+                setTimeout(renderWheel, 100);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -53,7 +53,7 @@
         
         .container {
             display: grid;
-            grid-template-columns: 1fr 800px 1fr;
+            grid-template-columns: 350px 1fr 350px;
             grid-template-rows: auto 1fr auto;
             grid-template-areas: 
                 "header header header"
@@ -128,8 +128,9 @@
         .wheel-container {
             grid-area: wheel;
             position: relative;
-            width: 700px;
-            height: 700px;
+            width: 600px;
+            height: 600px;
+            margin: auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -175,21 +176,113 @@
             gap: 10px;
         }
         
-        .status-grid {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 10px 20px;
-            font-family: 'JetBrains Mono', monospace;
+        /* NEW: Top Narratives Panel Styling */
+        .narratives-panel {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            height: 500px;
+            overflow-y: auto;
         }
-        
-        .status-label {
-            color: #888;
+
+        .narratives-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .narrative-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .narrative-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .narrative-name {
             font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fff;
         }
-        
-        .status-value {
-            font-weight: 600;
-            font-size: 16px;
+
+        .narrative-score {
+            font-size: 12px;
+            color: #00ff88;
+            margin-bottom: 8px;
+        }
+
+        .top-coin {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .coin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .coin-symbol {
+            font-weight: bold;
+            color: #ffd700;
+            font-size: 12px;
+        }
+
+        .coin-change {
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .coin-change.positive {
+            color: #00ff88;
+        }
+
+        .coin-change.negative {
+            color: #ff4444;
+        }
+
+        .coin-name {
+            font-size: 11px;
+            color: #ccc;
+            margin-bottom: 2px;
+        }
+
+        .coin-mcap {
+            font-size: 10px;
+            color: #aaa;
+        }
+
+        /* Scrollbar styling */
+        .narratives-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .narratives-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .narratives-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 136, 0.5);
+            border-radius: 10px;
         }
         
         .wheel-center {
@@ -263,53 +356,10 @@
             color: #00ff88;
         }
         
-        .cta-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-        }
-        
-        .cta-button {
-            background: #00ff88;
-            color: black;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .cta-button:hover {
-            background: #00cc6a;
-            transform: scale(1.05);
-        }
-        
         /* Advanced Animations */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes strong-pulse {
-            0%, 100% { 
-                filter: brightness(1.1) drop-shadow(0 0 20px currentColor);
-                transform: scale(1);
-            }
-            50% { 
-                filter: brightness(1.3) drop-shadow(0 0 35px currentColor);
-                transform: scale(1.02);
-            }
         }
         
         @keyframes pulse {
@@ -317,685 +367,244 @@
             50% { opacity: 0.3; }
         }
         
+        @keyframes strong-pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                filter: brightness(1) drop-shadow(0 0 15px currentColor);
+            }
+            50% { 
+                transform: scale(1.03); 
+                filter: brightness(1.2) drop-shadow(0 0 25px currentColor);
+            }
+        }
+        
         @keyframes glow {
-            0%, 100% { 
-                box-shadow: 
-                    0 0 30px rgba(0, 255, 136, 0.5),
-                    inset 0 0 30px rgba(0, 0, 0, 0.5);
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.6); }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "wheel"
+                    "right-panel"
+                    "footer";
+                gap: 15px;
             }
-            50% { 
-                box-shadow: 
-                    0 0 50px rgba(0, 255, 136, 0.8),
-                    inset 0 0 30px rgba(0, 0, 0, 0.5);
+            
+            .wheel-container {
+                width: 400px;
+                height: 400px;
             }
-        }
-        
-        @keyframes heartbeat {
-            0%, 100% { 
-                transform: scale(1);
-                filter: brightness(1);
+            
+            .left-panel {
+                display: none;
             }
-            50% { 
-                transform: scale(1.05);
-                filter: brightness(1.2);
-            }
-        }
-        
-        @keyframes danger {
-            0%, 100% { 
-                filter: brightness(1) hue-rotate(0deg);
-            }
-            50% { 
-                filter: brightness(0.7) hue-rotate(10deg);
-            }
-        }
-        
-        .wheel-active .wheel-center {
-            animation: glow 2s ease-in-out infinite;
-            border-color: #00ff88;
-        }
-        
-        .wheel-spinning .wheel-center {
-            border-color: #00ccff;
-            box-shadow: 0 0 30px rgba(0, 204, 255, 0.5);
-        }
-        
-        .wheel-spinning .wheel-center {
-            border-color: #00ccff;
-            box-shadow: 0 0 30px rgba(0, 204, 255, 0.5);
-        }
-        
-        .wheel-slow {
-            animation: pulse 3s ease-in-out infinite;
-        }
-        
-        .wheel-slow .wheel-center {
-            border-color: #ffaa00;
-            box-shadow: 0 0 30px rgba(255, 170, 0, 0.4);
-        }
-        
-        .wheel-stopped {
-            opacity: 0.6;
-            filter: grayscale(50%);
-        }
-        
-        .wheel-stopped .wheel-center {
-            border-color: #ff4444;
-            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
-        }
-        
-        /* Enhanced narrative labels with perfect visibility */
-        .narrative-label {
-            font-family: 'Inter', sans-serif;
-            font-weight: 800;
-            text-anchor: middle;
-            pointer-events: none;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-        }
-        
-        .score-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            text-anchor: middle;
-            pointer-events: none;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Specific styles for different narrative strength levels */
-        .narrative-strongest {
-            font-size: 24px;
-            fill: #ffffff;
-            text-shadow: 
-                0 0 15px #00ff88, 
-                0 0 30px #00ff88, 
-                0 0 45px #00ff88, 
-                3px 3px 6px rgba(0,0,0,1);
-        }
-        
-        .narrative-hot {
-            font-size: 18px;
-            fill: #ffffff;
-            text-shadow: 
-                0 0 12px #ff4444, 
-                0 0 24px #ff4444, 
-                2px 2px 4px rgba(0,0,0,0.9);
-        }
-        
-        .narrative-trending {
-            font-size: 16px;
-            fill: #ffffff;
-            text-shadow: 
-                0 0 10px currentColor, 
-                2px 2px 4px rgba(0,0,0,0.8);
-        }
-        
-        .narrative-rising {
-            font-size: 14px;
-            fill: #cccccc;
-            text-shadow: 
-                0 0 6px currentColor, 
-                1px 1px 3px rgba(0,0,0,0.8);
-        }
-        
-        .narrative-cool {
-            font-size: 11px;
-            fill: #999999;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-        }
-        
-        .score-strongest {
-            font-size: 20px;
-            fill: #00ff88;
-            text-shadow: 
-                0 0 12px #00ff88, 
-                0 0 24px #00ff88, 
-                3px 3px 6px rgba(0,0,0,1);
-        }
-        
-        .score-hot {
-            font-size: 16px;
-            fill: #ff4444;
-            text-shadow: 
-                0 0 10px #ff4444, 
-                2px 2px 4px rgba(0,0,0,0.9);
-        }
-        
-        .score-trending {
-            font-size: 14px;
-            fill: #ffffff;
-            text-shadow: 
-                0 0 8px currentColor, 
-                2px 2px 4px rgba(0,0,0,0.8);
-        }
-        
-        .score-rising {
-            font-size: 12px;
-            fill: #cccccc;
-            text-shadow: 
-                0 0 6px currentColor, 
-                1px 1px 3px rgba(0,0,0,0.8);
-        }
-        
-        .score-cool {
-            font-size: 10px;
-            fill: #999999;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-        }
-        
-        /* Footer */
-        .footer {
-            grid-area: footer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 15px;
-            font-size: 14px;
-            color: #888;
-        }
-        
-        .footer a {
-            color: #00ff88;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        
-        .footer a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">🎡</div>
-                <div class="logo-text">SOL TRENDWHEEL</div>
+                <div class="logo-text">Sol TrendWheel</div>
             </div>
-            <div class="live-indicator" style="background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88;">
-                <div class="live-dot" style="background: #00ff88;"></div>
-                <div class="live-text">Solana Network</div>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                <div class="live-text">Live</div>
             </div>
         </div>
         
-        <!-- Left Panel -->
         <div class="left-panel">
             <div class="panel-card">
-                <div class="panel-title">
-                    <span>📊</span> Wheel Status
-                </div>
-                <div class="status-grid">
-                    <div class="status-label">Status:</div>
-                    <div class="status-value" id="status">LOADING</div>
-                    
-                    <div class="status-label">Themes:</div>
-                    <div class="status-value" id="themeCount">0</div>
-                    
-                    <div class="status-label">Tokens:</div>
-                    <div class="status-value" id="tokenCount">50</div>
-                    
-                    <div class="status-label">Updated:</div>
-                    <div class="status-value" id="lastUpdate">Never</div>
-                </div>
-            </div>
-            
-            <div class="panel-card">
-                <div class="panel-title">
-                    <span>🎯</span> How It Works
-                </div>
-                <div style="font-size: 14px; line-height: 1.6; color: #ccc;">
-                    • Analyzes 50 Pump.fun tokens every 60 seconds<br>
-                    • Groups tokens by narrative themes using AI<br>
-                    • Wheel size reflects narrative strength<br>
-                    • Live updates based on real market data<br>
-                    • Dynamic visualization of crypto trends 🚀
-                </div>
+                <div class="panel-title">⚡ Status</div>
+                <div id="status-info">Loading...</div>
             </div>
         </div>
         
-        <!-- Wheel Container -->
-        <div class="wheel-container" id="wheelContainer">
-            <div class="loading" id="loading" style="color: #00ff88; font-size: 20px;">Loading Narratives...</div>
-            <svg id="wheel" width="700" height="700"></svg>
-            
+        <div class="wheel-container">
+            <svg id="wheel" width="600" height="600"></svg>
             <div class="wheel-center">
-                <div class="wheel-logo">🎡</div>
-                <div class="wheel-status" id="centerStatus">LOADING</div>
-                <div class="wheel-pulse" id="centerPulse">◉ SOLANA</div>
+                <div class="wheel-logo">SOL</div>
+                <div class="wheel-status" id="wheel-status">LOADING</div>
             </div>
+            <div class="loading" id="loading">Loading premium narratives...</div>
         </div>
         
-        <!-- Right Panel -->
         <div class="right-panel">
-            <div class="panel-card">
-                <div class="panel-title">
-                    <span>🔥</span> Top Narratives
-                </div>
-                <div id="topNarratives" style="font-size: 14px; color: #ccc;">
-                    Loading top narratives...
+            <div class="narratives-panel">
+                <div class="narratives-title">🔥 Top Narratives</div>
+                <div id="narratives-list">
+                    <div class="loading">Loading premium narratives...</div>
                 </div>
             </div>
-            
-            <div class="panel-card">
-                <div class="panel-title">
-                    <span>📈</span> Market Info
-                </div>
-                <div class="status-grid">
-                    <div class="status-label">Themes:</div>
-                    <div class="status-value" id="themeCount">0</div>
-                    
-                    <div class="status-label">Tokens:</div>
-                    <div class="status-value" id="tokenCount">0</div>
-                    
-                    <div class="status-label">Total Volume:</div>
-                    <div class="status-value">$<span id="totalVolume">0</span></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="footer">
-            <span>Powered by AI • Real Pump.fun Data • Live Narrative Analysis</span>
-            <span>•</span>
-            <a href="https://pump.fun" target="_blank">Pump.fun</a>
-            <span>•</span>
-            <a href="#" onclick="refreshData()">Refresh</a>
-        </div>
-        
-        <!-- CTA Overlay for Dead State -->
-        <div class="cta-overlay" id="ctaOverlay" style="display: none;">
-            <h2 style="font-size: 48px; margin-bottom: 20px;">� NO DATA �</h2>
-            <p style="font-size: 20px; margin-bottom: 30px;">Unable to fetch live narrative data from Pump.fun</p>
-            <button class="cta-button" onclick="refreshData()">REFRESH DATA</button>
         </div>
     </div>
 
     <script>
-        // Global state
         let wheelData = null;
-        let wheelSvg = null;
-        
-        // Initialize the wheel
-        async function initWheel() {
-            wheelSvg = d3.select("#wheel");
-            await fetchWheelData();
-            setInterval(fetchWheelData, 60000); // Update every 60 seconds
-        }
-        
-        // Fetch data from backend
-        async function fetchWheelData() {
+        let narratives = [];
+
+        async function fetchData() {
             try {
+                console.log('📡 Fetching wheel data...');
                 const response = await fetch('/api/wheel-state');
                 const data = await response.json();
                 
-                if (data.success) {
+                if (data.success && data.data) {
                     wheelData = data.data;
+                    console.log('✅ Data received:', wheelData);
+                    
+                    // Convert narratives object to array
+                    narratives = Object.entries(wheelData.narratives || {})
+                        .map(([name, data]) => ({ name, ...data }))
+                        .sort((a, b) => b.score - a.score);
+                    
                     updateUI();
                     renderWheel();
+                    updateStatus();
                 } else {
-                    console.error('Failed to fetch wheel data:', data);
+                    console.error('❌ Invalid data structure:', data);
+                    document.getElementById('loading').textContent = 'Failed to load data';
                 }
             } catch (error) {
-                console.error('Error fetching wheel data:', error);
+                console.error('❌ Error fetching data:', error);
+                document.getElementById('loading').textContent = 'Connection error - retrying...';
             }
         }
-        
-        // Update UI elements
+
+        function getColorForNarrative(name, index) {
+            const colors = [
+                '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', 
+                '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd',
+                '#00d2d3', '#ff9f43', '#ee5a24', '#00a8ff'
+            ];
+            return colors[index % colors.length];
+        }
+
         function updateUI() {
-            if (!wheelData) return;
+            const narrativesList = document.getElementById('narratives-list');
             
-            const status = document.getElementById('status');
-            const lastUpdate = document.getElementById('lastUpdate');
-            const centerStatus = document.getElementById('centerStatus');
-            const ctaOverlay = document.getElementById('ctaOverlay');
-            const loading = document.getElementById('loading');
-            const wheelContainer = document.getElementById('wheelContainer');
-            
-            // Hide loading
-            loading.style.display = 'none';
-            
-            // Update status with colors
-            const statusText = wheelData.status.toUpperCase();
-            status.textContent = statusText;
-            
-            // Update center display with narrative count instead of status
-            const centerPulse = document.getElementById('centerPulse');
-            centerStatus.textContent = `${wheelData.tokenData.narrativeCount || 0} THEMES`;
-            
-            // Apply status styling
-            status.style.color = getStatusColor(wheelData.status);
-            centerStatus.style.color = getStatusColor(wheelData.status);
-            
-            // Update pulse indicator based on status
-            const pulseTexts = {
-                'active': '● ACTIVE',
-                'spinning': '◐ SPINNING', 
-                'slow': '◑ SLOW',
-                'stopped': '○ STOPPED'
-            };
-            centerPulse.textContent = pulseTexts[wheelData.status] || '● LIVE';
-            centerPulse.style.color = getStatusColor(wheelData.status);
-            
-            // Update data - removed holders and liquidity
-            lastUpdate.textContent = new Date(wheelData.lastUpdate).toLocaleTimeString();
-            
-            // Update market info
-            const narratives = Object.entries(wheelData.narratives);
-            document.getElementById('themeCount').textContent = narratives.length;
-            document.getElementById('tokenCount').textContent = wheelData.tokenData.totalTokens || '50'; // Dynamic token count
-            
-            const totalVol = narratives.reduce((sum, [_, data]) => sum + (data.volume || 0), 0);
-            document.getElementById('totalVolume').textContent = Math.round(totalVol).toLocaleString();
-            
-            // Update top narratives
-            updateTopNarratives(narratives);
-            
-            // Handle stopped state - only show if we really have no data
-            if (wheelData.status === 'stopped' && wheelData.tokenData.narrativeCount === 0) {
-                ctaOverlay.style.display = 'flex';
-            } else {
-                ctaOverlay.style.display = 'none';
+            if (narratives.length === 0) {
+                narrativesList.innerHTML = '<div class="loading">No narratives available</div>';
+                return;
             }
-            
-            // Apply visual effects
-            wheelContainer.classList.remove('wheel-active', 'wheel-spinning', 'wheel-slow', 'wheel-stopped');
-            wheelContainer.classList.add(`wheel-${wheelData.status}`);
-        }
-        
-        // Get status color
-        function getStatusColor(status) {
-            switch(status) {
-                case 'active': return '#00ff88';
-                case 'spinning': return '#00ccff';
-                case 'slow': return '#ffaa00';
-                case 'stopped': return '#ff4444';
-                default: return '#ccc';
-            }
-        }
-        
-        // Update top narratives panel with clear strength indicators
-        function updateTopNarratives(narratives) {
-            const container = document.getElementById('topNarratives');
-            const sorted = narratives.sort((a, b) => b[1].score - a[1].score).slice(0, 5);
-            const maxScore = sorted.length > 0 ? sorted[0][1].score : 0;
-            
-            container.innerHTML = sorted.map(([name, data], index) => {
-                const score = data.score;
-                const isStrongest = score === maxScore && score > 60;
-                const isHot = score > 70;
-                const isTrending = score > 50;
-                const isRising = score > 30;
-                
-                // Get strength category
-                let category, emoji, bgColor, borderColor, textColor;
-                
-                if (isStrongest) {
-                    category = 'STRONGEST';
-                    emoji = '👑';
-                    bgColor = 'rgba(0,255,136,0.25)';
-                    borderColor = '#00ff88';
-                    textColor = '#00ff88';
-                } else if (isHot) {
-                    category = 'HOT';
-                    emoji = '🔥';
-                    bgColor = 'rgba(255,68,68,0.2)';
-                    borderColor = '#ff4444';
-                    textColor = '#ff6666';
-                } else if (isTrending) {
-                    category = 'TRENDING';
-                    emoji = '📈';
-                    bgColor = 'rgba(0,204,255,0.15)';
-                    borderColor = '#00ccff';
-                    textColor = '#00ccff';
-                } else if (isRising) {
-                    category = 'RISING';
-                    emoji = '⚡';
-                    bgColor = 'rgba(255,221,68,0.12)';
-                    borderColor = '#ffdd44';
-                    textColor = '#ffdd44';
-                } else {
-                    category = 'COOL';
-                    emoji = '';
-                    bgColor = 'rgba(255,255,255,0.05)';
-                    borderColor = 'transparent';
-                    textColor = '#999';
-                }
+
+            narrativesList.innerHTML = narratives.map((narrative, index) => {
+                const color = getColorForNarrative(narrative.name, index);
+                const isPositive = narrative.topCoin?.change24h?.startsWith('+');
                 
                 return `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 12px; 
-                        background: ${bgColor}; 
-                        border-radius: 12px; 
-                        border-left: 5px solid ${borderColor};
-                        ${isStrongest ? 'box-shadow: 0 0 15px rgba(0,255,136,0.3);' : ''}">
-                        <div style="display: flex; flex-direction: column; flex-grow: 1;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-                                <span style="font-size: 11px; color: ${textColor}; font-weight: 700; letter-spacing: 0.5px;">${category}</span>
-                                <span style="font-size: 16px;">${emoji}</span>
+                    <div class="narrative-item" style="border-left-color: ${color};">
+                        <div class="narrative-name">${narrative.name}</div>
+                        <div class="narrative-score">Score: ${narrative.score}% • ${narrative.mentions} mentions</div>
+                        ${narrative.topCoin ? `
+                            <div class="top-coin">
+                                <div class="coin-header">
+                                    <span class="coin-symbol">${narrative.topCoin.symbol}</span>
+                                    <span class="coin-change ${isPositive ? 'positive' : 'negative'}">${narrative.topCoin.change24h}</span>
+                                </div>
+                                <div class="coin-name">${narrative.topCoin.name}</div>
+                                <div class="coin-mcap">Market Cap: ${narrative.topCoin.marketCap}</div>
                             </div>
-                            <span style="font-weight: ${isStrongest ? '800' : '600'}; color: ${textColor}; font-size: ${isStrongest ? '16px' : '14px'};">${index + 1}. ${name}</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: ${textColor}; font-weight: ${isStrongest ? '900' : isHot ? 'bold' : '600'}; font-size: ${isStrongest ? '18px' : '16px'}; font-family: 'JetBrains Mono', monospace;">${score}%</div>
-                            ${data.trending ? `<div style="font-size: 10px; color: ${textColor}; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px;">${data.trending}</div>` : ''}
-                        </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
         }
-        
-        // Render the D3.js wheel with clear strongest narrative emphasis
+
+        function updateStatus() {
+            if (!wheelData) return;
+            
+            const statusEl = document.getElementById('status-info');
+            const wheelStatusEl = document.getElementById('wheel-status');
+            
+            const totalNarratives = narratives.length;
+            const avgScore = narratives.reduce((sum, n) => sum + n.score, 0) / totalNarratives;
+            
+            statusEl.innerHTML = `
+                <div><strong>Narratives:</strong> ${totalNarratives}</div>
+                <div><strong>Avg Score:</strong> ${avgScore.toFixed(1)}%</div>
+                <div><strong>Status:</strong> ${wheelData.status?.toUpperCase()}</div>
+                <div><strong>Tokens:</strong> ${wheelData.tokenData?.totalTokens || 0}</div>
+            `;
+            
+            wheelStatusEl.textContent = wheelData.status?.toUpperCase() || 'SPINNING';
+            wheelStatusEl.className = `wheel-status status-${wheelData.status || 'spinning'}`;
+        }
+
         function renderWheel() {
-            if (!wheelData || !wheelSvg) return;
-            
-            const width = 700;
-            const height = 700;
-            const radius = (Math.min(width, height) / 2 - 30) * 0.8; // Reduced by 20%
-            const innerRadius = 70;
-            
-            // Clear previous render
-            wheelSvg.selectAll("*").remove();
-            
-            // Create container group
-            const g = wheelSvg.append("g")
-                .attr("transform", `translate(${width/2},${height/2})`);
-            
-            // Prepare data
-            const narratives = Object.entries(wheelData.narratives);
-            console.log("📊 Narratives data:", narratives);
-            
-            // Sort narratives by strength to establish clear hierarchy
-            const sortedNarratives = narratives.sort((a, b) => b[1].score - a[1].score);
-            const strongestNarrative = sortedNarratives[0];
-            const maxScore = strongestNarrative ? strongestNarrative[1].score : 100;
-            
-            // Create pie layout with MASSIVE emphasis on strongest narratives
+            if (!narratives.length) return;
+
+            document.getElementById('loading').style.display = 'none';
+
+            const svg = d3.select("#wheel");
+            svg.selectAll("*").remove();
+
+            const width = 600;
+            const height = 600;
+            const radius = 250;
+            const innerRadius = 80;
+
+            const g = svg.append("g")
+                .attr("transform", `translate(${width/2}, ${height/2})`);
+
+            // Calculate maximum score for emphasis
+            const maxScore = Math.max(...narratives.map(n => n.score));
+            const strongestNarrative = narratives.find(n => n.score === maxScore);
+
             const pie = d3.pie()
-                .value(d => {
-                    const score = d[1].score;
-                    const relativeStrength = score / maxScore;
-                    
-                    // Give the strongest narrative dramatically more space
-                    if (score === maxScore && score > 60) {
-                        return 100; // Dominant size
-                    } else if (score > 70) {
-                        return 80 + (relativeStrength * 20);
-                    } else if (score > 50) {
-                        return 50 + (relativeStrength * 20);
-                    } else if (score > 30) {
-                        return 30 + (relativeStrength * 15);
-                    } else {
-                        return Math.max(15, score * 0.5); // Minimum visibility
-                    }
-                })
-                .sort((a, b) => b[1].score - a[1].score)
-                .padAngle(0.01); // Small gap between segments
-            
-            // Dynamic arc sizing - strongest narrative gets MUCH bigger radius
+                .value(d => Math.max(d.score, 5))
+                .sort((a, b) => b.score - a.score);
+
             const arc = d3.arc()
                 .innerRadius(innerRadius)
-                .outerRadius(d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return radius + 40; // Strongest extends way beyond wheel
-                    } else if (score > 70) {
-                        return radius + 25;
-                    } else if (score > 50) {
-                        return radius + 15;
-                    } else if (score > 30) {
-                        return radius + 8;
-                    } else {
-                        return radius - 10; // Weak narratives are smaller
-                    }
-                });
-            
-            // Label positioning for optimal readability
+                .outerRadius(radius);
+
             const labelArc = d3.arc()
-                .innerRadius(d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return radius + 10; // Position labels on the extended radius
-                    } else if (score > 50) {
-                        return radius - 15;
-                    } else {
-                        return radius - 25;
-                    }
-                })
-                .outerRadius(d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return radius + 10;
-                    } else if (score > 50) {
-                        return radius - 15;
-                    } else {
-                        return radius - 25;
-                    }
-                });
-            
-            // Score label positioning - MOVED TOWARD CENTER
+                .innerRadius(radius - 60)
+                .outerRadius(radius - 60);
+
             const scoreArc = d3.arc()
-                .innerRadius(d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return radius - 80; // Much closer to center
-                    } else if (score > 50) {
-                        return radius - 60; // Closer to center
-                    } else {
-                        return radius - 40; // Closer to center
-                    }
-                })
-                .outerRadius(d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return radius - 80; // Much closer to center
-                    } else if (score > 50) {
-                        return radius - 60; // Closer to center
-                    } else {
-                        return radius - 40; // Closer to center
-                    }
-                });
-            
-            // Subtle color system with unique colors for each narrative
-            const getEnhancedColor = (name, score) => {
-                // Unique, subtle colors for each narrative type
-                const baseColors = {
-                    'AI': '#6366f1',        // Indigo
-                    'Dogs': '#10b981',      // Emerald  
-                    'Cats': '#8b5cf6',      // Violet
-                    'Pepe': '#059669',      // Green
-                    'Gaming': '#7c3aed',    // Purple
-                    'Finance': '#dc2626',   // Red
-                    'Space': '#2563eb',     // Blue
-                    'Political': '#ea580c', // Orange
-                    'Food': '#c2410c',      // Orange-red
-                    'Chad': '#7c2d12',      // Brown
-                    'Baby': '#be185d',      // Pink
-                    'Super': '#1e40af',     // Dark blue
-                    'Farm': '#65a30d',      // Lime
-                    'Ocean': '#0891b2',     // Cyan
-                    'Culture': '#9333ea',   // Purple
-                    'Apes': '#b45309'       // Amber
-                };
+                .innerRadius(radius - 100)
+                .outerRadius(radius - 100);
+
+            // Enhanced color function with score-based variations
+            function getEnhancedColor(name, score) {
+                const baseColor = getColorForNarrative(name, narratives.findIndex(n => n.name === name));
                 
-                let baseColor = baseColors[name] || '#6b7280';
-                
-                // Subtle brightness adjustments based on score
-                if (score > 70) {
-                    return adjustColorBrightness(baseColor, 1.1); // Slightly brighter
+                if (score === maxScore && score > 60) {
+                    return "#00ff88"; // Bright green for strongest
+                } else if (score > 70) {
+                    return "#ff4444"; // Red for high
                 } else if (score > 50) {
-                    return baseColor; // Normal brightness
+                    return "#ffaa00"; // Orange for medium-high
                 } else if (score > 30) {
-                    return adjustColorBrightness(baseColor, 0.9); // Slightly dimmed
+                    return baseColor; // Original color for medium
                 } else {
-                    return adjustColorBrightness(baseColor, 0.7); // More dimmed
+                    return "#666666"; // Gray for low
                 }
-            };
-            
-            // Create arcs with dramatic strongest narrative emphasis
+            }
+
             const arcs = g.selectAll(".arc")
                 .data(pie(narratives))
                 .enter().append("g")
                 .attr("class", "arc");
-            
-            // Add paths with extreme styling for strongest narrative
+
+            // Create enhanced segments with dynamic properties
             arcs.append("path")
                 .attr("d", arc)
-                .attr("fill", d => getEnhancedColor(d.data[0], d.data[1].score))
-                .attr("stroke", d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return "#ffffff"; // Bright white border for strongest
-                    } else if (score > 70) {
-                        return "#ffffff";
-                    } else if (score > 50) {
-                        return "#cccccc";
-                    } else if (score > 30) {
-                        return "#999999";
-                    } else {
-                        return "#666666";
-                    }
-                })
-                .attr("stroke-width", d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return 6; // Extra thick border for strongest
-                    } else if (score > 70) {
-                        return 4;
-                    } else if (score > 50) {
-                        return 3;
-                    } else if (score > 30) {
-                        return 2;
-                    } else {
-                        return 1;
-                    }
-                })
+                .attr("fill", d => getEnhancedColor(d.data.name, d.data.score))
+                .attr("stroke", "#ffffff")
+                .attr("stroke-width", 2)
                 .style("opacity", d => {
-                    if (wheelData.status === 'stopped') return 0.4;
-                    if (wheelData.status === 'slow') return 0.7;
-                    
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return 1.0; // Full opacity for strongest
+                    const score = d.data.score;
+                    if (score === maxScore && score > 60) {
+                        return 1.0;
                     } else if (score > 70) {
                         return 0.95;
                     } else if (score > 50) {
@@ -1007,9 +616,9 @@
                     }
                 })
                 .style("filter", d => {
-                    const score = d.data[1].score;
+                    const score = d.data.score;
                     const isStrongest = score === maxScore && score > 60;
-                    const color = getEnhancedColor(d.data[0], score);
+                    const color = getEnhancedColor(d.data.name, score);
                     
                     if (isStrongest) {
                         return `drop-shadow(0 0 12px ${color}) brightness(1.15)`;
@@ -1023,17 +632,17 @@
                         return "brightness(0.85)";
                     }
                 });
-            
-            // Add labels with MASSIVE emphasis on strongest narrative
+
+            // Add labels with emphasis on strongest narrative
             arcs.append("text")
                 .attr("transform", d => `translate(${labelArc.centroid(d)})`)
                 .attr("class", "narrative-label")
                 .style("fill", d => {
-                    const score = d.data[1].score;
+                    const score = d.data.score;
                     const isStrongest = score === maxScore && score > 60;
                     
                     if (isStrongest) {
-                        return "#ffffff"; // Pure white for strongest
+                        return "#ffffff";
                     } else if (score > 70) {
                         return "#ffffff";
                     } else if (score > 50) {
@@ -1045,27 +654,27 @@
                     }
                 })
                 .style("font-size", d => {
-                    const score = d.data[1].score;
+                    const score = d.data.score;
                     const isStrongest = score === maxScore && score > 60;
                     
                     if (isStrongest) {
-                        return "24px"; // HUGE text for strongest
-                    } else if (score > 70) {
-                        return "18px";
-                    } else if (score > 50) {
                         return "16px";
-                    } else if (score > 30) {
+                    } else if (score > 70) {
                         return "14px";
-                    } else {
+                    } else if (score > 50) {
+                        return "12px";
+                    } else if (score > 30) {
                         return "11px";
+                    } else {
+                        return "10px";
                     }
                 })
                 .style("font-weight", d => {
-                    const score = d.data[1].score;
+                    const score = d.data.score;
                     const isStrongest = score === maxScore && score > 60;
                     
                     if (isStrongest) {
-                        return "900"; // Ultra bold for strongest
+                        return "900";
                     } else if (score > 50) {
                         return "800";
                     } else if (score > 30) {
@@ -1075,7 +684,7 @@
                     }
                 })
                 .style("text-shadow", d => {
-                    const score = d.data[1].score;
+                    const score = d.data.score;
                     const isStrongest = score === maxScore && score > 60;
                     
                     if (isStrongest) {
@@ -1090,19 +699,13 @@
                         return "1px 1px 2px rgba(0,0,0,0.7)";
                     }
                 })
-                .style("text-transform", d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    return (isStrongest || score > 50) ? "uppercase" : "none";
-                })
                 .text(d => {
-                    const score = d.data[1].score;
-                    const name = d.data[0];
+                    const score = d.data.score;
+                    const name = d.data.name;
                     const isStrongest = score === maxScore && score > 60;
                     
                     if (isStrongest) {
-                        return `👑 ${name} 👑`; // Crown for strongest
+                        return `👑 ${name} 👑`;
                     } else if (score > 70) {
                         return `🔥 ${name}`;
                     } else if (score > 50) {
@@ -1113,67 +716,38 @@
                         return name;
                     }
                 });
-            
-            // Add prominent score labels MOVED TOWARD CENTER with bright colors
+
+            // Add score labels
             arcs.append("text")
                 .attr("transform", d => {
                     const centroid = scoreArc.centroid(d);
-                    // Move percentages MUCH closer to center - 50% closer!
-                    centroid[0] *= 0.5;
-                    centroid[1] *= 0.5;
+                    centroid[0] *= 0.7;
+                    centroid[1] *= 0.7;
                     return `translate(${centroid})`;
                 })
                 .attr("class", "score-label")
-                .style("fill", "#00ff00") // BRIGHT GREEN to see if it's working!
-                .style("font-size", "24px") // HUGE font size to see the change!
-                .style("font-weight", d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return "900";
-                    } else if (score > 50) {
-                        return "800";
-                    } else if (score > 30) {
-                        return "700";
-                    } else {
-                        return "600";
-                    }
-                })
-                .style("text-shadow", d => {
-                    const score = d.data[1].score;
-                    const isStrongest = score === maxScore && score > 60;
-                    
-                    if (isStrongest) {
-                        return "0 0 12px #00ff88, 0 0 24px #00ff88, 3px 3px 6px rgba(0,0,0,1)";
-                    } else if (score > 70) {
-                        return "0 0 10px #ff4444, 2px 2px 4px rgba(0,0,0,0.9)";
-                    } else if (score > 50) {
-                        return "0 0 8px currentColor, 2px 2px 4px rgba(0,0,0,0.8)";
-                    } else if (score > 30) {
-                        return "0 0 6px currentColor, 1px 1px 3px rgba(0,0,0,0.8)";
-                    } else {
-                        return "1px 1px 2px rgba(0,0,0,0.8)";
-                    }
-                })
-                .text(d => `${Math.round(d.data[1].score)}%`);
-            
-            // Only animate the strongest narrative with a special pulsing effect
+                .style("fill", "#00ff88")
+                .style("font-size", "16px")
+                .style("font-weight", "800")
+                .style("text-shadow", "0 0 8px #00ff88, 2px 2px 4px rgba(0,0,0,0.9)")
+                .style("text-anchor", "middle")
+                .text(d => `${Math.round(d.data.score)}%`);
+
+            // Only animate the strongest narrative
             arcs.each(function(d) {
-                const score = d.data[1].score;
+                const score = d.data.score;
                 const isStrongest = score === maxScore && score > 60;
                 const element = d3.select(this).select("path");
                 
                 if (isStrongest) {
                     element.style("animation", "strong-pulse 1.5s ease-in-out infinite");
-                } 
-                // Remove other animations to avoid distraction from the strongest
+                }
             });
-            
-            // Add a dramatic glow ring only around the strongest narrative
-            if (strongestNarrative && strongestNarrative[1].score > 60) {
+
+            // Add dramatic glow ring for strongest narrative
+            if (strongestNarrative && strongestNarrative.score > 60) {
                 g.append("circle")
-                    .attr("r", radius + 60)
+                    .attr("r", radius + 40)
                     .attr("fill", "none")
                     .attr("stroke", "#00ff88")
                     .attr("stroke-width", 3)
@@ -1182,24 +756,10 @@
                     .style("animation", "strong-pulse 2s ease-in-out infinite");
             }
         }
-        
-        // Helper function to adjust color brightness
-        function adjustColorBrightness(color, factor) {
-            const hex = color.replace('#', '');
-            const r = Math.min(255, Math.floor(parseInt(hex.substr(0, 2), 16) * factor));
-            const g = Math.min(255, Math.floor(parseInt(hex.substr(2, 2), 16) * factor));
-            const b = Math.min(255, Math.floor(parseInt(hex.substr(4, 2), 16) * factor));
-            
-            return `rgb(${r}, ${g}, ${b})`;
-        }
-        
-        // Refresh data function
-        function refreshData() {
-            location.reload();
-        }
-        
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initWheel);
+
+        // Initialize
+        fetchData();
+        setInterval(fetchData, 30000); // Update every 30 seconds
     </script>
 </body>
 </html>

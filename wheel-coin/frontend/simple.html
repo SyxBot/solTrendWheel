@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sol TrendWheel 🎡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+        
+        .title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .wheel {
+            width: 80vmin;
+            height: 80vmin;
+            max-width: 400px;
+            max-height: 400px;
+            border: 4px solid #00ff88;
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle, rgba(0,0,0,0.8) 0%, rgba(26,26,46,0.9) 100%);
+            animation: spin 10s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .narrative-list {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 80%;
+        }
+        
+        .narrative-item {
+            background: rgba(255,255,255,0.1);
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            border-left: 3px solid #00ff88;
+        }
+        
+        .narrative-score {
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .loading {
+            color: #ffd700;
+        }
+        
+        .success {
+            color: #00ff88;
+        }
+        
+        .error {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">🎡 SOL TRENDWHEEL</div>
+        
+        <div class="wheel">
+            <div class="narrative-list" id="narratives">
+                <div class="loading">Loading Premium Narratives...</div>
+            </div>
+        </div>
+        
+        <div class="status" id="status">
+            <span class="loading">Connecting to market data...</span>
+        </div>
+    </div>
+
+    <script>
+        async function loadNarratives() {
+            const narrativesEl = document.getElementById('narratives');
+            const statusEl = document.getElementById('status');
+            
+            try {
+                console.log('Fetching narratives...');
+                const response = await fetch('/api/wheel-state');
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.narratives) {
+                    const narratives = Object.entries(data.data.narratives);
+                    console.log('Got', narratives.length, 'narratives');
+                    
+                    let html = '';
+                    narratives.forEach(([name, narrative]) => {
+                        html += `
+                            <div class="narrative-item">
+                                <div>${name}</div>
+                                <div class="narrative-score">${narrative.score}% Score</div>
+                            </div>
+                        `;
+                    });
+                    
+                    narrativesEl.innerHTML = html;
+                    statusEl.innerHTML = `<span class="success">✅ ${narratives.length} Premium Narratives Active</span>`;
+                } else {
+                    throw new Error('No narratives found');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                narrativesEl.innerHTML = '<div class="error">❌ Failed to load narratives</div>';
+                statusEl.innerHTML = '<span class="error">❌ Connection failed</span>';
+            }
+        }
+        
+        // Load data when page loads
+        loadNarratives();
+        
+        // Refresh every 30 seconds
+        setInterval(loadNarratives, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHEEL</title>
+    <style>
+        body { background: black; color: white; text-align: center; font-family: Arial; padding: 20px; }
+        .wheel { width: 200px; height: 200px; border: 3px solid lime; border-radius: 50%; margin: 20px auto; display: flex;
+                align-items: center; justify-content: center; animation: spin 3s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        h1 { color: lime; }
+    </style>
+</head>
+<body>
+    <h1>SOL WHEEL</h1>
+    <div class="wheel">
+        <div id="data">Loading...</div>
+    </div>
+    <div id="info">Status</div>
+    <script>
+        function get() {
+            fetch('/api/wheel-state').then(r => r.json()).then(d => {
+                if (d.success) {
+                    let txt = '';
+                    Object.entries(d.data.narratives).forEach(([n, v]) => {
+                        txt += n + ': ' + v.score + '%<br>';
+                    });
+                    document.getElementById('data').innerHTML = txt;
+                    document.getElementById('info').innerHTML = 'LIVE: ' + Object.keys(d.data.narratives).length + ' narratives';
+                }
+            }).catch(() => {
+                document.getElementById('data').innerHTML = 'ERROR';
+            });
+        }
+        get();
+        setInterval(get, 15000);
+    </script>
+</body>
+</html>

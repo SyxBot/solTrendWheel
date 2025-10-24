@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Sol TrendWheel 🎡 - Debug</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .debug-panel {
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .narrative {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #00ff88;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #00ff88; }
+        .loading { color: #ffd700; }
+        #wheel-container {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            position: relative;
+        }
+        #wheel {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎡 Sol TrendWheel Debug</h1>
+    
+    <div class="debug-panel">
+        <h3>Connection Status</h3>
+        <div id="status" class="loading">Testing connection...</div>
+    </div>
+    
+    <div class="debug-panel">
+        <h3>API Response</h3>
+        <div id="api-response">Loading...</div>
+    </div>
+    
+    <div class="debug-panel">
+        <h3>Narratives</h3>
+        <div id="narratives">Loading...</div>
+    </div>
+    
+    <div id="wheel-container">
+        <svg id="wheel"></svg>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        console.log('🚀 Debug page starting...');
+        
+        async function testConnection() {
+            const statusEl = document.getElementById('status');
+            const responseEl = document.getElementById('api-response');
+            const narrativesEl = document.getElementById('narratives');
+            
+            try {
+                statusEl.innerHTML = '<span class="loading">Fetching data...</span>';
+                console.log('📡 Fetching from /api/wheel-state');
+                
+                const response = await fetch('/api/wheel-state');
+                console.log('📡 Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('📦 Data received:', data);
+                
+                statusEl.innerHTML = '<span class="success">✅ Connected successfully!</span>';
+                responseEl.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                // Display narratives
+                if (data.success && data.data && data.data.narratives) {
+                    const narratives = Object.entries(data.data.narratives);
+                    console.log('📊 Processing', narratives.length, 'narratives');
+                    
+                    let narrativeHTML = '';
+                    narratives.forEach(([name, narrative]) => {
+                        narrativeHTML += `
+                            <div class="narrative">
+                                <strong>${name}</strong><br>
+                                Score: ${narrative.score}% | 
+                                Volume: $${(narrative.volume || 0).toLocaleString()} | 
+                                Status: ${narrative.lifecycle || 'stable'}
+                            </div>
+                        `;
+                    });
+                    
+                    narrativesEl.innerHTML = narrativeHTML;
+                    
+                    // Try to render a simple wheel
+                    renderSimpleWheel(narratives);
+                } else {
+                    narrativesEl.innerHTML = '<span class="error">❌ No narratives found in response</span>';
+                }
+                
+            } catch (error) {
+                console.error('❌ Connection error:', error);
+                statusEl.innerHTML = `<span class="error">❌ Connection failed: ${error.message}</span>`;
+                responseEl.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+                narrativesEl.innerHTML = '<span class="error">❌ Failed to load narratives</span>';
+            }
+        }
+        
+        function renderSimpleWheel(narratives) {
+            console.log('🎨 Rendering simple wheel...');
+            
+            const svg = d3.select('#wheel');
+            svg.selectAll('*').remove();
+            
+            const width = 300;
+            const height = 300;
+            const radius = 120;
+            
+            const g = svg.append('g')
+                .attr('transform', `translate(${width/2}, ${height/2})`);
+            
+            // Create pie
+            const pie = d3.pie()
+                .value(d => Math.max(d[1].score, 1));
+            
+            const arc = d3.arc()
+                .innerRadius(40)
+                .outerRadius(radius);
+            
+            // Colors
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#fd79a8'];
+            
+            // Create segments
+            const segments = g.selectAll('.segment')
+                .data(pie(narratives))
+                .enter().append('g')
+                .attr('class', 'segment');
+            
+            segments.append('path')
+                .attr('d', arc)
+                .attr('fill', (d, i) => colors[i % colors.length])
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2);
+            
+            // Add labels
+            segments.append('text')
+                .attr('transform', d => `translate(${arc.centroid(d)})`)
+                .attr('text-anchor', 'middle')
+                .attr('fill', 'white')
+                .attr('font-size', '10px')
+                .attr('font-weight', 'bold')
+                .text(d => d.data[1].score + '%');
+            
+            console.log('✅ Simple wheel rendered');
+        }
+        
+        // Test immediately
+        testConnection();
+        
+        // Test every 10 seconds
+        setInterval(testConnection, 10000);
+    </script>
+</body>
+</html>
